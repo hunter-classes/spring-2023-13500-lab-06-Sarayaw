@@ -1,39 +1,40 @@
 #include <iostream>
 #include <string>
 #include <cctype>
+#include "vigenere.h"
 
-char shiftChar(char c, int rshift)
-{
-    if (std::isupper(c))
-    {
-        c = ((c - 'A' + rshift) % 26) + 'A';
-    }
-    else if (std::islower(c))
-    {
-        c = ((c - 'a' + rshift) % 26) + 'a';
-    }
+char shiftChar(char c, char key) {
+  int shift;
+  if (islower(key)) {
+    shift = key - 'a';
+  }
+  else if (isupper(key)) {
+    shift = key - 'A';
+  }
+  else {
     return c;
+  }
+
+  if (isupper(c)) {
+    c = (c - 'A' + shift) % 26 + 'A';
+  }
+  else if (islower(c)) {
+    c = (c - 'a' + shift) % 26 + 'a';
+  }
+  return c;
 }
 
-std::string caesarCipher(int shift, const std::string& sentence)
-{
-    std::string newSentence;
-    for (char c : sentence)
-    {
-        if (std::isalpha(c))
-        {
-            newSentence += shiftChar(c, shift);
-        }
-        else
-        {
-            newSentence += c;
-        }
+std::string encryptVigenere(const std::string& plaintext, const std::string& keyword) {
+  std::string ciphertext;
+  int keyIndex = 0;
+  for (char c : plaintext) {
+    if (isalpha(c)) {
+      ciphertext += shiftChar(c, keyword[keyIndex]);
+      keyIndex = (keyIndex + 1) % keyword.length();
     }
-    return newSentence;
-}
-
-int main()
-{
-    std::cout << caesarCipher(7, "Abcd Efg") << '\n';
-    return 0;
+    else {
+      ciphertext += c;
+    }
+  }
+  return ciphertext;
 }

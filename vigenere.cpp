@@ -1,42 +1,45 @@
 #include <iostream>
 #include <string>
 #include <cctype>
-#include "caesar.h"
 #include "vigenere.h"
 
-// Shift the character by the given shift value, and wrap around the alphabet if necessary
-char shiftKeyChar(char c, int &rshift) {
-    if (isupper(c)) { // If the character is uppercase
-        c = c + rshift; // Shift the character's value by the shift value
-        if (c > 'Z') { // If the character's ASCII value is greater than 'Z' after the shift
-            c = c - 'Z' + 'A' - 1; // Wrap around the alphabet
-        }
-    } else if (islower(c)) { // If the character is lowercase
-        c = c + rshift; // Shift the character's ASCII value by the shift value
-        if (c > 'z') { // If the character's ASCII value is greater than 'z' after the shift
-            c = c - 'z' + 'a' - 1; // Wrap around the alphabet
-        }
+char shiftChar(char c, char key) {
+  char output = c;
+  int shift = 0;
+  
+  if (islower(key)) {
+    shift = key - 'a';
+  }
+  else if (isupper(key)) {
+    shift = key - 'A';
+  }
+
+  if (isalpha(c)) {
+    if (isupper(c)) { // Range of A-Z is 65(A) to 90(Z)
+      if ((c+shift) > 'Z') { // If out of bounds
+        output = 'A' + (c+shift-'[');
+      } else {
+        output = c + shift;
+      }
+    } else if (islower(c)) { // Range of a-z is 97(a) to 122(z)
+      if ((c + shift) > 'z') { // If out of bounds
+        output = 'a' + (c+shift - '{');
+      } else {
+        output = c + shift;
+      }
     }
-    return c;
+  }
+  return output;
 }
 
-// Encrypt the plaintext using the Vigenere cipher with the given keyword
-std::string encryptVigenere(const std::string& plaintext, const std::string& keyword) {
-    std::string newSent;
-    int keyIndex = 0;
-    for (char c : plaintext) { // Loop through each character in the plaintext
-        if (isalpha(c)) { // If the character is a letter
-            char shifted = shiftKeyChar(c, keyword[keyIndex] - 'a'); // Shift the character by the corresponding shift value
-            newSent += shifted; // Add the shifted character to the new sentence
-            keyIndex = (keyIndex + 1) % keyword.length(); // Move to the next letter in the keyword
-        } else {
-            newSent += c; // If the character is not a letter, add it to the new sentence as is
-        }
+std::string encryptVigenere(std::string plaintext, std::string keyword) {
+  int keyIndex = 0;
+  int max = keyword.length();
+  for (int i = 0; i < plaintext.length(); i++) {
+    if(isalpha(plaintext[i])) {
+      plaintext[i] = shiftChar(plaintext[i], keyword[keyIndex]);
+      keyIndex = (keyIndex + 1) % max;
     }
-    return newSent;
-}
-
-int main() {
-    std::cout << encryptVigenere("ABCDEFGHI", "aabbcc") << std::endl;
-    return 0;
+  }
+  return plaintext;
 }
